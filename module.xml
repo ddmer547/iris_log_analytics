@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="IRISLOG.ZPM">
+    <Module>
+      <Name>IRISLOG</Name>
+      <Version>2.0.1</Version>
+      <Description>交互服务2.0</Description>
+      <Keywords>IRISLOG</Keywords>
+      <Author>
+        <Person>王喆</Person>
+        <Organization>武汉</Organization>
+        <CopyrightDate>2023</CopyrightDate>
+        <License>MIT</License>
+        <Notes>代码</Notes>
+      </Author>
+      <Packaging>IRISLOG</Packaging>
+      <!-- 导入代码 -->
+      <Resource Name="IRISLOG.PKG"/>
+      <Resource Name="IRISLOGPKG.PKG"/> 
+	  <SystemSetting Name="CSP.DefaultFileCharset" Value="UTF-8"/>
+      <SourcesRoot>src</SourcesRoot>
+    </Module>
+  </Document>
+</Export>
