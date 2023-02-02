@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for Windows (x86-64) 2022.1.2 (Build 574U)" ts="2023-02-02 15:00:33">
+<Class name="IRISLOG.Demo.BO.HLHTSyncResp">
+<Super>Ens.BusinessOperation</Super>
+<TimeChanged>66503,59769.5883612</TimeChanged>
+<TimeCreated>66503,39616.4589311</TimeCreated>
+
+<Parameter name="ADAPTER">
+<Default>EnsLib.SOAP.OutboundAdapter</Default>
+</Parameter>
+
+<Property name="Adapter">
+<Type>EnsLib.SOAP.OutboundAdapter</Type>
+</Property>
+
+<Parameter name="INVOCATION">
+<Default>Queue</Default>
+</Parameter>
+
+<Method name="ReturnSuccess">
+<FormalSpec>pRequest:Ens.StringRequest,*pResponse:EnsLib.EDI.XML.Document</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC = $$$OK
+	Set pResponse=##class(EnsLib.EDI.XML.Document).%New()
+	Set xdataID="IRISLOG.Demo.BO.HLHTSyncResp||HL7V3Response"
+    Set compiledXdata=##class(%Dictionary.CompiledXData).%OpenId(xdataID)
+    Set tStream=compiledXdata.Data
+    If '$IsObject(tStream) Set tSC=%objlasterror Quit
+	Set pResponse = pResponse.ImportFromLibraryStream(tStream,.tSC)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<XData name="MessageMap">
+<Data><![CDATA[
+<MapItems>
+	<MapItem MessageType="Ens.StringRequest"> 
+		<Method>ReturnSuccess</Method>
+	</MapItem>
+</MapItems>
+]]></Data>
+</XData>
+
+<XData name="HL7V3Response">
+<Data><![CDATA[
+<MCCI_IN000002UV01 ITSVersion="XML_1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:hl7-org:v3" xsi:schemaLocation="urn:hl7-org:v3 ../multicacheschemas/MCCI_IN000002UV01.xsd">
+	<id root="2.16.156.10011.2.5.1.1" extension="9070E693CAE04D00A35946E23015027E"/>
+	<creationTime value="20170106151903"/>
+	<interactionId root="2.16.156.10011.2.5.1.2" extension="MCCI_IN000002UV01"/>
+	<processingCode code="P"/>
+	<processingModeCode/>
+	<acceptAckCode code="AL"/>
+	<receiver typeCode="RCV">
+		<device classCode="DEV" determinerCode="INSTANCE">
+			<id>
+				<item root="2.16.156.10011.2.5.1.3" extension="BKIP"/>
+			</id>
+		</device>
+	</receiver>
+	<sender typeCode="SND">
+		<device classCode="DEV" determinerCode="INSTANCE">
+			<id>
+				<item root="2.16.156.10011.2.5.1.3" extension="HIS"/>
+			</id>
+		</device>
+	</sender>
+	<acknowledgement typeCode="AA">
+		<!--请求消息ID-->
+		<targetMessage>
+			<id root="2.16.156.10011.2.5.1.1" extension="630D96C7AAF942DFBAF67C6929986740"/>
+		</targetMessage>
+		<acknowledgementDetail>
+			<text value="消息处理成功"/>
+		</acknowledgementDetail>
+	</acknowledgement>
+</MCCI_IN000002UV01>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="IRISLOG.Demo.BS.TestWs">
+<Super>EnsLib.SOAP.Service</Super>
+<TimeChanged>66506,51212.9132514</TimeChanged>
+<TimeCreated>66503,39395.4230187</TimeCreated>
+
+<Parameter name="ADAPTER">
+</Parameter>
+
+<Parameter name="SERVICENAME">
+<Description>
+Name of the WebService</Description>
+<Default>TestWs</Default>
+</Parameter>
+
+<Parameter name="NAMESPACE">
+<Description>
+TODO: Change this to actual network address
+URL for invoking the WebService
+Parameter LOCATION = "http://127.0.0.1:8972/csp/ensemble";
+TODO: Change this to actual SOAP namespace
+SOAP namespace for the WebService</Description>
+<Default>http://tempuri.org</Default>
+</Parameter>
+
+<Method name="Sample">
+<FormalSpec>pInput:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<WebMethod>1</WebMethod>
+<Implementation><![CDATA[
+	$$$LOGINFO(pInput)
+	Set req = ##class(Ens.StringRequest).%New()
+	Set req.StringValue = pInput
+	Set tSC=..ProcessInput(req,.tResponse,"Sample")
+	If $$$ISERR(tSC) Do ..ReturnMethodStatusFault(tSC)
+	Quit tResponse
+]]></Implementation>
+</Method>
+
+<Method name="OnProcessInput">
+<FormalSpec><![CDATA[pInput:%RegisteredObject,*pOutput:%RegisteredObject,&pHint:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set tSC=..SendRequestSync("IRISLOG.Demo.BO.HLHTSyncResp",pInput,.pOutput)
+	Quit tSC
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="IRISLOG.InitalData">
+<Super>%RegisteredObject</Super>
+<TimeChanged>66507,40029.2176688</TimeChanged>
+<TimeCreated>66507,35391.072311</TimeCreated>
+
+<Method name="Run">
+<Description>
+pPath为安装文件路径</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pPath</FormalSpec>
+<Implementation><![CDATA[
+    Kill ^Ens.Util.LogD
+    Kill ^Ens.Util.LogI
+    Do $system.OBJ.Load(pPath_"\log1.gof")
+    Do $system.OBJ.Load(pPath_"\log2.gof")
+    Do $system.OBJ.Load(pPath_"\msgbody.gof")
+    Do $system.OBJ.Load(pPath_"\msghead1.gof")
+    Do $system.OBJ.Load(pPath_"\msghead2.gof")
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="IRISLOG.SOA.EventLog.MSG.EventLogQueryReq">
+<Super>%Persistent,%JSON.Adaptor</Super>
+<TimeChanged>66505,51599.1724033</TimeChanged>
+<TimeCreated>66505,49595.806861</TimeCreated>
+
+<Property name="ID">
+<Description>
+ID</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Type">
+<Description>
+类型</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Text">
+<Description>
+错误详情</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="TimeLogged">
+<Description>
+记录时间</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Page">
+<Description>
+当前页码</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Rows">
+<Description>
+每页显示最大条数</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="StartTime">
+<Description>
+时间下限</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="EndTime">
+<Description>
+时间上限</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SessionID">
+<Description>
+会话ID</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ConfigName">
+<Description>
+组件名称</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>^IRISLOG.SO9F58.EventLogQue6313D</DataLocation>
+<DefaultData>EventLogQueryReqDefaultData</DefaultData>
+<IdLocation>^IRISLOG.SO9F58.EventLogQue6313D</IdLocation>
+<IndexLocation>^IRISLOG.SO9F58.EventLogQue6313I</IndexLocation>
+<StreamLocation>^IRISLOG.SO9F58.EventLogQue6313S</StreamLocation>
+<Data name="EventLogQueryReqDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ID</Value>
+</Value>
+<Value name="3">
+<Value>Type</Value>
+</Value>
+<Value name="4">
+<Value>Text</Value>
+</Value>
+<Value name="5">
+<Value>TimeLogged</Value>
+</Value>
+<Value name="6">
+<Value>Page</Value>
+</Value>
+<Value name="7">
+<Value>Rows</Value>
+</Value>
+<Value name="8">
+<Value>StartTime</Value>
+</Value>
+<Value name="9">
+<Value>EndTime</Value>
+</Value>
+<Value name="10">
+<Value>SessionID</Value>
+</Value>
+<Value name="11">
+<Value>ConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="IRISLOG.SOA.EventLog.MSG.EventLogQueryResp">
+<Super>Ens.Response,%JSON.Adaptor</Super>
+<TimeChanged>66505,49741.3803149</TimeChanged>
+<TimeCreated>66505,49741.0645828</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Description>
+XMLNAME</Description>
+<Default>Response</Default>
+</Parameter>
+
+<Property name="Code">
+<Description>
+状态码 </Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Msg">
+<Description>
+消息信息 </Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+</Property>
+
+<Property name="Total">
+<Description>
+条数</Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Data">
+<Description>
+数据</Description>
+<Type>IRISLOG.SOA.EventLog.MSG.EventLogRespData</Type>
+<Collection>list</Collection>
+</Property>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DefaultData>EventLogQueryRespDefaultData</DefaultData>
+<Data name="EventLogQueryRespDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"EventLogQueryResp"</Subscript>
+<Value name="1">
+<Value>Code</Value>
+</Value>
+<Value name="2">
+<Value>Msg</Value>
+</Value>
+<Value name="3">
+<Value>Total</Value>
+</Value>
+<Value name="4">
+<Value>Data</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="IRISLOG.SOA.EventLog.MSG.EventLogRespData">
+<Super>%SerialObject,%XML.Adaptor,%JSON.Adaptor</Super>
+<TimeChanged>66505,49692.5910503</TimeChanged>
+<TimeCreated>66505,49692.290324</TimeCreated>
+
+<Parameter name="XMLNAME">
+<Description>
+XMLNAME</Description>
+<Default>Data</Default>
+</Parameter>
+
+<Property name="ID">
+<Description>
+ID </Description>
+<Type>%Integer</Type>
+</Property>
+
+<Property name="Type">
+<Description>
+事件类型</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ConfigName">
+<Type>%String</Type>
+</Property>
+
+<Property name="SessionID">
+<Description>
+会话ID</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Text">
+<Description>
+文本/记录内容</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Property name="TimeLogged">
+<Description>
+记录时间</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="SourceMethod">
+<Description>
+方法</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="SourceClass">
+<Description>
+代码类</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Storage.Serial</Type>
+<State>EventLogRespDataState</State>
+<StreamLocation>^IRISLOG.SO9F58.EventLogResBEC9S</StreamLocation>
+<Data name="EventLogRespDataState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>ID</Value>
+</Value>
+<Value name="2">
+<Value>Type</Value>
+</Value>
+<Value name="3">
+<Value>ConfigName</Value>
+</Value>
+<Value name="4">
+<Value>SessionID</Value>
+</Value>
+<Value name="5">
+<Value>Text</Value>
+</Value>
+<Value name="6">
+<Value>TimeLogged</Value>
+</Value>
+<Value name="7">
+<Value>SourceMethod</Value>
+</Value>
+<Value name="8">
+<Value>SourceClass</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Class name="IRISLOG.SOA.EventLog.rest">
+<Super>%CSP.REST</Super>
+<TimeChanged>66507,52462.4835317</TimeChanged>
+<TimeCreated>66101,64695.946949</TimeCreated>
+
+<Parameter name="SpecificationClass">
+<Default>petstore.spec</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Description>
+此应用程序的默认内容类型。</Description>
+<Default>application/json</Default>
+</Parameter>
+
+<Parameter name="CONVERTINPUTSTREAM">
+<Description>
+默认情况下，将输入流转换为Unicode</Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Description>
+默认响应字符集是utf-8</Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+{
+    "ID": "",
+    "Type": "",
+    "Text": "",
+    "TimeLogged": "",
+    "Page": 1,
+    "Rows": 100,
+    "StartTime": "2023-01-29 00:00:00",
+    "EndTime": "2023-01-31 23:59:59",
+    "SessionID": "",
+    "ConfigName": ""
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="GetEventLog">
+<Description>
+事件日志查询</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	    Set req = ##class(IRISLOG.SOA.EventLog.MSG.EventLogQueryReq).%New()
+  		Set data = %request.Content
+  		Try {
+   			 $$$TOE(tSC,req.%JSONImport(data))
+  			}
+  		Catch errObj {
+     		Do ##class(IRISLOG.SOA.utils.baseresp).failResp("入参不合法")
+     		Return $$$OK
+  		}
+ 		Do $SYSTEM.SQL.SetSelectMode(1)
+        #;确定入参查询字段 入参转字符串
+        Set p = req.Page
+        Set r = req.Rows
+        Set Type = ##class(%String).LogicalToDisplay(req.Type)
+        Set Text = ##class(%String).LogicalToDisplay(req.Text)
+        Set TimeLogged = ##class(%String).LogicalToDisplay(req.TimeLogged)
+        Set StartTime = ##class(%String).LogicalToDisplay(req.StartTime)
+        Set EndTime = ##class(%String).LogicalToDisplay(req.EndTime)
+        Set SessionID = ##class(%String).LogicalToDisplay(req.SessionID)
+        Set ConfigName = ##class(%String).LogicalToDisplay(req.ConfigName)
+        
+        #;分页-最后一页
+        Set maxPage = p*r 
+        #;分页-第一页
+        Set minPage = (p-1)*r +1
+        #;拼出查询SQL
+        Set strSql = " SELECT TOP 10000000"
+        Set strSql = strSql_" s.ID ,"
+        Set strSql = strSql_" s.Type ,"
+        Set strSql = strSql_" s.ConfigName ,"
+        Set strSql = strSql_" s.SessionID ,"
+        Set strSql = strSql_" s.Text ,"
+        Set strSql = strSql_" s.TimeLogged ,"
+        Set strSql = strSql_" s.SourceMethod ,"
+        Set strSql = strSql_" s.SourceClass "
+        Set strSql = strSql_" From Ens_Util.Log s where 1=1"
+        #;拼出SQL条件语句
+        If $LENGTH(Type) '= 0 {    
+        	Set strSql = strSql_" AND s.Type in ("_Type_")"
+        }
+        If $LENGTH(ConfigName) '= 0 {
+        	Set strSql = strSql_" AND s.ConfigName = '"_ConfigName_"'"
+        }
+        If $LENGTH(SessionID) '= 0 {
+        	Set strSql = strSql_" AND s.SessionID = '"_SessionID_"'"
+        }
+        If $LENGTH(Text) '= 0 {
+        	Set strSql = strSql_" AND CHARINDEX('"_Text_"',s.Text)>0"
+        }
+        If $LENGTH(StartTime) '= 0 {
+	        Set StartTime = $zdatetimeh(StartTime,3,1)
+        	Set StartTime = $zdatetime(StartTime,3,1)_".000"	
+        	Set strSql = strSql_" AND s.TimeLogged > '"_StartTime_"'"
+        }
+        If $LENGTH(EndTime) '= 0 {	
+        	Set EndTime = $zdatetimeh(EndTime,3,1)
+        	Set EndTime = $zdatetime(EndTime,3,1)_".999"
+        	Set strSql = strSql_" AND s.TimeLogged < '"_EndTime_"'"
+        } 
+        Set strSql = strSql_" ORDER BY s.TimeLogged DESC"
+		#;w strSql,!
+        #;初始化返回消息内容
+        Set Response = {}
+        Set Response.Code = 200
+        Set Response.Msg = "成功"
+        Set Response.Total = 0
+        #;计算查询数目
+        Set countSQL = "select count(*) as total from ( "_strSql_" )"
+        Set countRs = ##class(%SQL.Statement).%ExecDirect(,countSQL)
+        If countRs.%Next(){
+            Set Response.Total = countRs.%Get("total")
+        }
+        If (Response.Total = 0){
+            Set Response.Code = 200
+            Set Response.Msg = "成功"
+            Set Response.Total = 0
+        }Else{
+            #;将SQL执行的结果赋值给rs并作相应判断
+            Set setSql = "SELECT *,%VID from("_strSql_" )where %VID BETWEEN "_minPage_" AND "_maxPage_""
+            Set rs = ##class(%SQL.Statement).%ExecDirect(,setSql)
+            Set Data = []
+            While rs.%Next() {
+	            Do Data.%Push({
+		            "ID":             (rs.%Get("ID")),
+		            "Type":             (rs.%Get("Type")),
+		            "ConfigName":             (rs.%Get("ConfigName")),
+		            "SessionID":             (rs.%Get("SessionID")),
+		            "Text":             (rs.%Get("Text")),
+		            "TimeLogged":             (rs.%Get("TimeLogged")),
+		            "SourceMethod":             (rs.%Get("SourceMethod")),
+		            "SourceClass":             (rs.%Get("SourceClass"))
+		           }) 
+            }
+            #;判断是否有数据，并作相应判断，并将返回结果转换成Json输出
+            If rs.%ROWCOUNT =0{
+        		Do ##class(IRISLOG.SOA.utils.baseresp).failResp("没有数据")
+      		}Else{
+        		Set Response.Data = Data
+       		 Write Response.%ToJSON()
+      		}
+        }  
+
+    Return $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+{
+  "startTime": "2023-01-24 00:00:00",
+  "endTime": "2023-01-31 23:59:59"
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="GetEventTypeNum">
+<Description>
+事件日志-统计事件类型数量</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+  Set data = %request.Content
+  Set obj = ##class(%DynamicObject).%FromJSON(data)
+  Set startTime = obj.startTime
+  Set endTime = obj.endTime
+#;  Set startTime = $zdt($h-7,3)_" 00:00:00"
+#;  Set endTime = $zdt($h,3)
+
+  Set startTime = ##class(%String).LogicalToDisplay(startTime)
+  Set endTime = ##class(%String).LogicalToDisplay(endTime)
+  
+  Set strSql = "select t.Type,count(*) as Num From Ens_Util.Log t where 1=1 "
+            _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} > '"_startTime_"'"
+            _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} < '"_endTime_"' group by t.Type" 
+  
+  Set Response = {}
+  #;w strSql
+  Set rs = ##class(%SQL.Statement).%ExecDirect(,strSql)
+  If (rs.%SQLCODE<0) {
+      Do ##class(IRISLOG.SOA.utils.baseresp).failResp("sql出错")
+	    Return $$$OK
+  }Else{
+	   Set Response.status = 200
+       Set Response.msg = "success"
+       Set data = []
+      	While rs.%Next() {
+	            Do data.%Push({
+		            "Type":             (rs.%Get("Type")),
+		            "Num":             (rs.%Get("Num"))
+		           }) 
+            }
+            #;判断是否有数据，并作相应判断，并将返回结果转换成Json输出
+            If rs.%ROWCOUNT =0{
+        		Do ##class(IRISLOG.SOA.utils.baseresp).failResp("没有数据")
+      		}Else{
+        		Set Response.data = data
+       		 Write Response.%ToJSON()
+      		}
+  }
+  Return $$$OK
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+{
+  "startTime": "2023-01-28 00:00:00",
+  "endTime": "2023-01-31 23:59:59"
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="GetConfigEventNum">
+<Description>
+事件日志-统计组件事件数量</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+  Set data = %request.Content
+  Set obj = ##class(%DynamicObject).%FromJSON(data)
+  Set startTime = obj.startTime
+  Set endTime = obj.endTime
+#;  Set startTime = $zdt($h-7,3)_" 00:00:00"
+#;  Set endTime = $zdt($h,3)
+
+  Set startTime = ##class(%String).LogicalToDisplay(startTime)
+  Set endTime = ##class(%String).LogicalToDisplay(endTime)
+  
+  Set strSql = "select top 8 t.ConfigName,count(*) as Num From Ens_Util.Log t where 1=1 "
+            _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} > '"_startTime_"'"
+            _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} < '"_endTime_"' group by t.ConfigName order by Num desc" 
+  
+  Set Response = {}
+  #;w strSql
+  Set rs = ##class(%SQL.Statement).%ExecDirect(,strSql)
+  If (rs.%SQLCODE<0) {
+      Do ##class(IRISLOG.SOA.utils.baseresp).failResp("sql出错")
+	    Return $$$OK
+  }Else{
+	   Set Response.status = 200
+       Set Response.msg = "success"
+       Set data = []
+      	While rs.%Next() {
+	      	Set configname = rs.%Get("ConfigName")
+	      	If configname=""{
+		      	Set configname = "Production"
+		      	}
+	            Do data.%Push({
+		            "ConfigName":             (configname),
+		            "Num":             (rs.%Get("Num"))
+		           }) 
+            }
+            #;判断是否有数据，并作相应判断，并将返回结果转换成Json输出
+            If rs.%ROWCOUNT =0{
+        		Do ##class(IRISLOG.SOA.utils.baseresp).failResp("没有数据")
+      		}Else{
+        		Set Response.data = data
+       		 Write Response.%ToJSON()
+      		}
+  }
+  Return $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Get7DaysEventNum">
+<Description>
+事件日志-统计7天消息数量</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  Set data = %request.Content
+  Set obj = ##class(%DynamicObject).%FromJSON(data)
+  Set startTime = obj.startTime
+  Set endTime = obj.endTime
+
+#;  Set startTime = $zdt($h-7,3)_" 00:00:00"
+#;  Set endTime = $zdt($h,3)
+
+#;  Set strSql = "SELECT t.TimeSlot, count(*) as Num FROM Ens_Activity_Data.Days t where 1=1 and t.TimeSlot > '"_startTime_"' group by t.TimeSlot"
+  Set strSql = "select top 7 count(*) as num, timelog from (select to_char(t.TimeLogged, 'yyyy/mm/dd') as timelog,id From Ens_Util.Log t where 1=1 and t.TimeLogged between '"_startTime_"' and '"_endTime_"')b group by b.timelog"			
+            
+  
+  Set Response = {}
+  #;w strSql
+  Set rs = ##class(%SQL.Statement).%ExecDirect(,strSql)
+  If (rs.%SQLCODE<0) {
+      Do ##class(IRISLOG.SOA.utils.baseresp).failResp("sql出错")
+	    Return $$$OK
+  }Else{
+	   Set Response.status = 200
+       Set Response.msg = "success"
+       Set data = []
+      	While rs.%Next() {
+	      	
+	            Do data.%Push({
+		            "TimeSlot":             (rs.%Get("timelog")),
+		            "Num":             (rs.%Get("num"))
+		           }) 
+            }
+            #;判断是否有数据，并作相应判断，并将返回结果转换成Json输出
+            If rs.%ROWCOUNT =0{
+        		Do ##class(IRISLOG.SOA.utils.baseresp).failResp("没有数据")
+      		}Else{
+        		Set Response.data = data
+       		 Write Response.%ToJSON()
+      		}
+  }
+  Return $$$OK
+]]></Implementation>
+</Method>
+</Class>
+
+
+<Class name="IRISLOG.SOA.api">
+<Super>IRISLOG.SOA.EventLog.rest</Super>
+<TimeChanged>66506,52010.6836094</TimeChanged>
+<TimeCreated>66105,34179.199492</TimeCreated>
+
+<Parameter name="SpecificationClass">
+<Default>petstore.spec</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Description>
+此应用程序的默认内容类型。</Description>
+<Default>application/json</Default>
+</Parameter>
+
+<Parameter name="CONVERTINPUTSTREAM">
+<Description>
+默认情况下，将输入流转换为Unicode</Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="HandleCorsRequest">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Description>
+默认响应字符集是utf-8</Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<XData name="UrlMap">
+<Data><![CDATA[
+<Routes>
+
+<!--事件日志 -->
+<Route Url="/GetEventLog" Method="POST" Call="GetEventLog"/>
+<Route Url="/GetEventTypeNum" Method="POST" Call="GetEventTypeNum"/>
+<Route Url="/GetConfigEventNum" Method="POST" Call="GetConfigEventNum"/>
+<Route Url="/Get7DaysEventNum" Method="POST" Call="Get7DaysEventNum"/>
+
+</Routes>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="IRISLOG.SOA.utils.baseresp">
+<TimeChanged>66123,57359.912452</TimeChanged>
+<TimeCreated>66108,53467.945261</TimeCreated>
+
+<Method name="succResp">
+<Description>
+通用返回</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  Set resp = {}
+  Set resp.status = 200
+  Set resp.msg = "success"
+  Set resp.total = 1
+  Do resp.%ToJSON()
+  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="failResp">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>errstr:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  Set resp = {}
+  Set resp.status = -1
+  Set resp.msg = errstr
+  Set resp.total = 0
+  set data = []
+  Set resp.data=data
+  Do resp.%ToJSON()
+  Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+
+
+
+
+<Class name="IRISLOGPKG.FoundationProduction">
+<ProcedureBlock>0</ProcedureBlock>
+<Super>Ens.Production</Super>
+<TimeChanged>66505,61961.1286499</TimeChanged>
+<TimeCreated>66502,64666.708279</TimeCreated>
+
+<XData name="ProductionDefinition">
+<Data><![CDATA[
+<Production Name="IRISLOGPKG.FoundationProduction" LogGeneralTraceEvents="false">
+  <Description></Description>
+  <ActorPoolSize>1</ActorPoolSize>
+  <Item Name="IRISLOG.Demo.BO.HLHTSyncResp" Category="" ClassName="IRISLOG.Demo.BO.HLHTSyncResp" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  </Item>
+  <Item Name="IRISLOG.Demo.BS.TestWs" Category="" ClassName="IRISLOG.Demo.BS.TestWs" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  </Item>
+  <Item Name="Ens.Activity.Operation.Local" Category="" ClassName="Ens.Activity.Operation.Local" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  </Item>
+</Production>
+]]></Data>
+</XData>
+</Class>
+
+
+</Export>
