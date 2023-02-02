@@ -205,7 +205,7 @@ ClassMethod GetConfigEventNum() As %Status
   Set startTime = ##class(%String).LogicalToDisplay(startTime)
   Set endTime = ##class(%String).LogicalToDisplay(endTime)
   
-  Set strSql = "select top 7 t.ConfigName,count(*) as Num From Ens_Util.Log t where 1=1 "
+  Set strSql = "select top 8 t.ConfigName,count(*) as Num From Ens_Util.Log t where 1=1 "
             _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} > '"_startTime_"'"
             _" and {fn RIGHT(%EXTERNAL(t.TimeLogged),999)} < '"_endTime_"' group by t.ConfigName order by Num desc" 
   
@@ -252,7 +252,7 @@ ClassMethod Get7DaysEventNum() As %Status
 #;  Set endTime = $zdt($h,3)
 
 #;  Set strSql = "SELECT t.TimeSlot, count(*) as Num FROM Ens_Activity_Data.Days t where 1=1 and t.TimeSlot > '"_startTime_"' group by t.TimeSlot"
-  Set strSql = "select top 7 count(*) as num, timelog from (select to_char(t.TimeLogged, 'yyyy/mm/dd') as timelog,id From Ens_Util.Log t where 1=1 and t.TimeLogged between '"_startTime_"' and '"_endTime_"')b group by b.timelog order by num desc"			
+  Set strSql = "select top 7 count(*) as num, timelog from (select to_char(t.TimeLogged, 'yyyy/mm/dd') as timelog,id From Ens_Util.Log t where 1=1 and t.TimeLogged between '"_startTime_"' and '"_endTime_"')b group by b.timelog"			
             
   
   Set Response = {}
