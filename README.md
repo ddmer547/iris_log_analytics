@@ -80,13 +80,13 @@ You can jump to the IRIS message viewing interface. If you are prompted not to l
 
 在管理门户中创建名为IRISLOG的命名空间
 
-![image-20230202115641533](D:\Backup\A-TEST\irislog\img/image-20230202115641533.png)
+![image-20230202115641533](img/image-20230202115641533.png)
 
 ##### 2.导入代码
 
 在Studio中，打开IRISLOG命名空间，Tools-->Import Local...，导入IRISLOG.xml文件
 
-![image-20230202150213232](D:\Backup\A-TEST\irislog\img/image-20230202150213232.png)
+![image-20230202150213232](img/image-20230202150213232.png)
 
 ##### 3.初始化数据
 
@@ -98,7 +98,7 @@ do ##class(IRISLOG.InitalData).Run("F:\glo")
 
 等待几分钟可以看到Global导入成功的信息。
 
-![image-20230202140100764](D:\Backup\A-TEST\irislog\img/image-20230202140100764.png)
+![image-20230202140100764](img/image-20230202140100764.png)
 
 ##### 4.配置Web应用程序
 
@@ -108,27 +108,27 @@ REST接口配置
 
 点击“新建Web应用程序”，配置信息如下图所示，点击“保存”
 
-![image-20230202140526378](D:\Backup\A-TEST\irislog\img/image-20230202140526378.png)
+![image-20230202140526378](img/image-20230202140526378.png)
 
 应用程序角色选择%All，点击“保存”
 
 
 
-![image-20230202140708670](D:\Backup\A-TEST\irislog\img/image-20230202140708670.png)
+![image-20230202140708670](img/image-20230202140708670.png)
 
 ##### 5.效果展示
 
 下载前端代码包dist，双击打开dist包下的index.html可看到如下页面
 
-![image-20230202141744648](D:\Backup\A-TEST\irislog\img/image-20230202141744648.png)
+![image-20230202141744648](img/image-20230202141744648.png)
 
 URL配置为IRISLOG的ip和端口，点击发送可以看到日志具体信息
 
-![image-20230202141930171](D:\Backup\A-TEST\irislog\img/image-20230202141930171.png)
+![image-20230202141930171](img/image-20230202141930171.png)
 
 点击“跳转”，配置IRISLOG命名空间地址，如图所示
 
-![image-20230202142651513](D:\Backup\A-TEST\irislog\img/image-20230202142651513.png)
+![image-20230202142651513](img/image-20230202142651513.png)
 
 即可跳转到IRIS消息查看界面，如果提示未登录，输入IRIS账号密码登录即可
 
